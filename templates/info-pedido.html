@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Contato</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+<body>
+    <nav>
+        <a href="/">Início</a> |
+        <a href="/catalogo">Catálogo</a> |
+        <a href="/mural">Mural</a> |
+        <a href="/carrinho">Carrinho</a> |
+        <a href="/pedidos"> Pedidos </a> |
+        <a href="/login">Login</a>
+
+    </nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS</h2>
+            </div>
+        </a>
+    </header>
+    
+    <!DOCTYPE html>
+<html lang="pt-br">
+
+<div class="pedido-finalizado">
+    <p>Obrigado por escolher O Astronauta Bordados! Seu pedido foi enviado com sucesso.</p>
+    <p>O código do seu pedido é <strong> {{codigo_pedido}} </strong></p>
+    <p>Para acompanhar e fazer alterações, consulte seu código na aba <a href="/pedidos">PEDIDOS </a></p>
+</div> 
+<div class="todos-pedidos"  >
+{% for item in pedidos %}
+<div class="pedido-container1">
+
+    <input type="hidden" name="codigo_pedido" value="{{ item.codigo_pedido }}">
+    <div class="pedido-container2">
+        <p>Referência:</p>
+        <img src="{{ url_for('static', filename='imagens/' ~item.imagem) }}" width="150">
+        <p>Preço: R$ {{ item.preco }}</p>
+        <p>Detalhes do bordado:</p>
+        <ul>
+            {% for desc in item.bordado_tamanho.split %}
+                <li>{{ desc.strip() }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="pedido-container3">
+        <p>Pedido:</p>
+        <div class="imagem-container3">
+            {% if item.fotos %}
+                {% for foto in item.fotos.split(',') %}
+                <img src="{{ url_for('static', filename='imagens/' ~foto.strip()) }}" width="150">
+                {% endfor %}
+            {% else %}
+                <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" width="100" alt="Sem imagem enviada">
+            {% endif %}
+        </div>
+        <p>Detalhes do pedido:</p>
+        <ul>
+
+            <li>{{ detalhes_pedido }}</li>
+
+        </ul>
+        <p>Quantidade: {{ item.quantidade }}</p>
+    </div>
+
+</div>
+{% endfor %}
+</div>
+
+
+<!-- Usa o primeiro item da lista como referência para dados do cliente -->
+<div class="info-cliente">
+    <p>Nome: {{ pedidos[0].nome_cliente }}</p>
+    <p>Email: {{ pedidos[0].email_cliente }}</p>
+    <p>Telefone: {{ pedidos[0].tel_cliente }}</p>
+    <p>Status: {{ pedidos[0].status_pedido }}</p>
+    <p>Data do pedido: {{ pedidos[0].data_pedido.strftime('%d/%m/%Y') }}</p>
+</div>
+
+ <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+    <div class="carrinho-fixo">
+        <a href="/carrinho">
+            <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+        </a>
+    </div>
+
+    <div class="carrinho-container">
+        {% if item_carrinho %}
+        <span class="bolinha-notificacao"></span>
+        {% endif %}
+    </div>
+
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>
+</body>
+</html>

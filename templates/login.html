@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/astronauta.png') }}">
+    <title>Login - O Astronauta Bordados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+<body>
+    <nav>
+    <div class = "menu">
+        <a href="/">Início</a>
+        <a href="/catalogo">Catálogo</a>
+        <a href="/mural">Mural</a>
+        <a href="/carrinho">Carrinho</a>
+        <a href="pedidos"> Pedidos </a>
+        <a class="menu-select" href="/login">Login</a>
+    </div>
+    </nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS</h2>
+            </div>
+        </a>
+    </header>
+
+<div class="login-site">
+
+    <form method="post">
+
+        {% if mensagem %}
+         <p style="color: red;">{{ mensagem }}</p>
+        {% endif %}
+
+        <div id="login-section">
+            <label for="usuario">Usuário:</label><br>
+            <input type="text" name="usuario" id="usuario" required><br><br>
+    
+            <label for="senha">Senha:</label><br>
+            <input type="password" name="senha" id="senha" required><br><br>
+            <div class="botao-centro">
+                <input type="submit" class= "botao-cadastro" name="acao" value="login">
+                <a href="{{ url_for('cadastro') }}" 
+                type="button" class= "botao-cadastro">Criar Conta</a>
+            </div>    
+        </div>
+    
+    </form>
+</div>
+ <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+    <div class="carrinho-fixo">
+        <a href="/carrinho">
+            <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+        </a>
+    </div>
+
+    <div class="carrinho-container">
+        {% if item_carrinho %}
+        <span class="bolinha-notificacao"></span>
+        {% endif %}
+    </div>
+</body>
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>
+</html>

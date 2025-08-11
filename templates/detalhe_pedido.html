@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+    <title>Início - O Astronauta Bordados</title>
+    </head>
+<body>
+    <nav>
+        <div class="botao-perfil">
+            <div class="foto-perfil">
+                {% if usuario %}
+                    <a href="{{ url_for('perfil') }}">
+                        <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                    </a>
+                {% else %}
+                    <img src="{{ url_for('static', filename='imagens/user.png') }}">
+                {% endif %}
+            </div>
+        
+            {%if nome and sobrenome %}
+                <a href="{{url_for('perfil')}}">{{nome}} {{sobrenome}}</a>
+            {% else %}
+                <a href="{{url_for('perfil')}}">Usuário</a>
+            {% endif %}
+          </div>
+    
+        <div class="menu">
+        
+            <a href="/">Início</a>
+            <a href="/catalogoadm">Catálogo</a>
+            <a href="/muraladm">Mural</a>
+            <a href="/configuracoes">Configurações</a>
+            <a class="menu-select" href="/pedidos">Pedidos</a>
+            <a href="/logout" onclick="return confirm('Tem certeza que deseja sair?')">Logout</a>
+        </div>
+    </nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS | ADMINISTRADOR</h2>
+            </div>
+        </a>
+    </header>
+
+<!-- Botão Voltar ao Catálogo -->
+{%if menu == 'Pendente'%}
+    <div class="botoes-align">
+    <div class="botoes-conf-select">
+        <button type="button" onclick="enviarStatusPedidos('pendente')" class="botoes-select">Pendentes</button>
+    </div>    
+    <div class="botoes-conf">
+        <button type="button" onclick="enviarStatusPedidos('processo')" class="botao-nselect">Em Andamento</button>
+        <button type="button" onclick="enviarStatusPedidos('finalizado')" class="botao-nselect">Finalizados</button>
+    </div>
+</div>
+{%elif menu =='Em Andamento'%}
+    <div class="botoes-align">
+    <div class="botoes-conf">
+        <button type="button" onclick="enviarStatusPedidos('pendente')" class="botao-nselect">Pendentes</button>
+    </div>    
+    <div class="botoes-conf-select">
+        <button type="button" onclick="enviarStatusPedidos('processo')" class="botoes-select">Em Andamento</button>
+    </div>
+    <div class="botoes-conf">
+        <button type="button" onclick="enviarStatusPedidos('finalizado')" class="botao-nselect">Finalizados</button>
+    </div>
+</div>
+{%else%}
+    <div class="botoes-align">
+    <div class="botoes-conf">
+        <button type="button" onclick="enviarStatusPedidos('pendente')" class="botao-nselect">Pendentes</button>
+    </div>    
+    <div class="botoes-conf">
+        <button type="button" onclick="enviarStatusPedidos('processo')" class="botao-nselect">Em Andamento</button>
+    </div>
+    <div class="botoes-conf-select">
+        <button type="button" onclick="enviarStatusPedidos('finalizado')" class="botoes-select">Finalizados</button>
+    </div>
+</div>
+{%endif%}
+
+<aside>
+    <div class="aside-container">
+        <p>Total de pedidos: {{ pedidos|length }}</p>
+        <p>Status: {{ menu }}</p>
+        {% if pedidos %}
+            <p>Último pedido: {{ pedidos[0].data_pedido.strftime('%d/%m/%Y') }}</p>
+        {% else %}
+            <p>Nenhum pedido encontrado.</p>
+        {% endif %}
+    </div>
+</aside>
+
+
+<div class="todos-pedidos">
+    {% for item in pedidos %}  
+        <div class="pedido-container1">
+
+            <input type="hidden" name="codigo_pedido" value="{{ item.codigo_pedido }}">
+            <div class="pedido-container2">
+                <p>Referência:</p>
+                <img src="{{ url_for('static', filename='imagens/' + item.imagem) }}" width="150">
+                <p>Preço: R$ {{ item.preco }}</p>
+                <p>Tamanho: {{ item.bordado_tamanho}} cm</p>
+                <p>Detalhes do bordado:</p>
+                <ul>
+                {%for descricao in detalhes_bordados %}
+                    <li>{{ descricao }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="pedido-container3">
+                <p>Pedido:</p>
+                <div class="imagem-container3">
+                    {% if item.fotos %}
+                        {% for foto in item.fotos.split(',') %}
+                        <img src="{{ url_for('static', filename='imagens/' ~foto.strip()) }}" width="150">
+                        {% endfor %}
+                    {% else %}
+                        <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" width="100" alt="Sem imagem enviada">
+                    {% endif %}
+                </div>
+                <p>Detalhes do pedido:</p>
+                <p> {{item.descricao}}</p>
+                <p>Quantidade: {{ item.quantidade }}</p>
+            </div>
+            
+        </div>
+    {% endfor %}
+
+</div>    
+<!-- Usa o primeiro item da lista como referência para dados do cliente -->
+<div class="info-cliente">
+    <p>Nome: {{ pedidos[0].nome_cliente }}</p>
+    <p>Email: {{ pedidos[0].email_cliente }}</p>
+    <p>Telefone: {{ pedidos[0].tel_cliente }}</p>
+    <p>Status: {{ pedidos[0].status_pedido }}</p>
+    <p>Data: {{ pedidos[0].data_pedido.strftime('%d/%m/%Y') }}</p>
+</div>
+
+<form action="/status_pedido" method="post" class="quantidade">
+    <div class="status-pedido">
+        <input type="hidden" name="codigo_pedido" value="{{ pedidos[0].codigo_pedido }}">
+
+        <label for="status{{ pedidos[0].codigo_pedido }}">Status:</label>
+        <select name="status" id="status{{ pedidos[0].codigo_pedido }}">
+            <option value="Pendente" {% if pedidos[0].status_pedido == 'Pendente' %}selected{% endif %}>Pendente</option>
+            <option value="Em Andamento" {% if pedidos[0].status_pedido == 'Em Andamento' %}selected{% endif %}>Em Andamento</option>
+            <option value="Finalizado" {% if pedidos[0].status_pedido == 'Finalizado' %}selected{% endif %}>Finalizado</option>
+        </select>
+        
+        <button class="botao-carrinho" type="submit">&#10003;</button>
+    </div>
+</form>
+<form action="{{url_for('excluir_pedidoadm', codigo_pedido=pedidos[0].codigo_pedido) }}" method="POST" >
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este pedido?')">Excluir Pedido</button>
+</form>
+
+<form id="form-status-pedidos" method="POST" action="/pedidos" style="display: none;">
+    <input type="hidden" name="menu-pedidos" id="input-menu-pedidos">
+</form>
+
+
+<script>
+    function enviarStatusPedidos(status) {
+        document.getElementById('input-menu-pedidos').value = status;
+        document.getElementById('form-status-pedidos').submit();
+    }
+</script>
+       
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>
+</body>
+</html>

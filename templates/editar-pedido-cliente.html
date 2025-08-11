@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Contato</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+<body>
+        <nav>
+        <div class="botao-perfil">
+        <div class="foto-perfil">
+            {% if usuario %}
+                <a href="{{ url_for('perfil') }}">
+                    <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                </a>
+            {% else %}
+                <img src="{{ url_for('static', filename='imagens/user.png') }}">
+            {% endif %}
+        </div>
+    
+        {%if nome and sobrenome %}
+            <a href="{{url_for('perfil')}}">{{nome}} {{sobrenome}}</a>
+        {% else %}
+            <a href="{{url_for('perfil')}}">Usuário</a>
+        {% endif %}
+      </div>
+
+        <a href="/inicio-cliente">Início</a> |
+        <a href="/catalogo-cliente">Catálogo</a> |
+        <a href="/mural-cliente">Mural</a> |
+        <a href="/carrinho-cliente">Carrinho</a> |
+        <a href="/pedido-cliente"> Pedidos </a> |
+        <a href="/logout" onclick="return confirm('Tem certeza que deseja sair?')">Logout</a>
+
+    </nav>
+
+    <header class="logo-header">
+        <a href="/inicio-cliente">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS | CLIENTE</h2>
+            </div>
+        </a>
+    </header>
+    <div class="pedido-container1">
+        <div class="pedido-container2">
+            <p>Referência do Pedido: {{ pedido['codigo_pedido'] }}</p>
+            <p>Preço: R$ {{ pedido['preco'] }}</p>
+            <p>Detalhes do bordado: {{ pedido['bordado_descricao'] }}</p>
+        </div>
+
+        <div class="pedido-container3">
+            <p>Imagens enviadas:</p>
+            <div class="imagem-container3">
+                {% if pedido['fotos'] %}
+                    {% for foto in pedido['fotos'].split(',') %}
+                        <img src="{{ url_for('static', filename='imagens/' ~ foto.strip()) }}" width="150">
+                    {% endfor %}
+                {% else %}
+                    <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" width="100" alt="Sem imagem enviada">
+                {% endif %}
+            </div>
+            <p>Quantidade: {{ pedido['quantidade'] }}</p>
+        </div>
+    </div>
+
+    <div class="edicao-pedido">
+        <p>Editar Pedido</p>
+        <form action="{{ url_for('editar_pedido_cliente', codigo_pedido=pedido['codigo_pedido']) }}" method="POST">
+            <input type="hidden" name="codigo_pedido" value="{{ pedido['codigo_pedido'] }}">
+
+            <label for="descricao">Descrição do Pedido:</label>
+            <textarea name="descricao" id="descricao" required>{{ pedido['descricao'] }}</textarea>
+
+            <button type="submit">Salvar</button>
+        </form>
+    </div> 
+    <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+        <div class="carrinho-fixo">
+            <a href="/carrinho-cliente">
+                <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+            </a>
+        </div>
+        <div class="carrinho-container">
+            {% if item_carrinho %}
+            <span class="bolinha-notificacao"></span>
+            {% endif %}
+        </div>
+    <footer class ="rodape">
+        <p>&copy; 2025 O Astronauta Bordados.</p>
+        {%for contato in contatos %}
+        <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+        {% endfor %}
+    </footer>
+</body>
+</html>

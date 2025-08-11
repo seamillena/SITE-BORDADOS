@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/astronauta.png') }}">
+    <title>Pedidos - O Astronauta Bordados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+<nav>
+    {%if tipo != 'usuario'%}
+    <div class="botao-perfil">
+        <div class="foto-perfil">
+            {% if usuario %}
+                <a href="{{ url_for('perfil') }}">
+                    <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                </a>
+            {% else %}
+                <img src="{{ url_for('static', filename='imagens/user.png') }}">
+            {% endif %}
+        </div>
+    
+        {%if nome and sobrenome %}
+            <a href="{{url_for('perfil')}}"> {{nome}} {{sobrenome}}</a>
+        {% else %}
+            <a href="{{url_for('perfil')}}">Usuário</a>
+        {% endif %}
+    </div>
+    {%endif%}
+    
+    <div class="menu">
+        <a href="/">Início</a>
+        <a href="/catalogo">Catálogo</a>
+        <a href="/mural">Mural</a>
+        {%if tipo =='administrador'%}
+            <a href="/configuracoes">Configurações</a>
+        {%else%}
+            <a href="/carrinho">Carrinho</a>
+        {%endif%}
+        <a class="menu-select" href="/pedidos">Pedidos</a>
+        {%if tipo =='usuario'%}
+            <a href="/login">Login</a>
+        {%else%}
+            <a href="/logout">Logout</a>
+        {%endif%}
+
+    </div>
+</nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                {%if tipo =='usuario'%}
+                    <h2>BORDADOS</h2>
+                {%elif tipo =='administrador'%}
+                    <h2>BORDADOS | ADMINISTRADOR</h2>
+                {%else%}
+                    <h2>BORDADOS | CLIENTE</h2>
+                {%endif%}
+            </div>
+        </a>
+    </header>
+<body>
+<div class="pagina">
+
+{%if tipo == 'administrador' %}
+ 
+   <div class="botoes-align">
+        <form method="POST" class="botoes-conf">
+            {%if menu =='pendente'%}
+            <button type="submit" class="botoes-select" name="menu-pedidos" value="pendente">Pendentes</button>
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="processo">Em Andamento</button>
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="finalizado">Finalizados</button>
+            {%elif menu =='processo'%}
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="pendente">Pendentes</button>
+            <button type="submit" class="botoes-select" name="menu-pedidos" value="processo">Em Andamento</button>
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="finalizado">Finalizados</button>
+            {%else%}
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="pendente">Pendentes</button>
+            <button type="submit" class="botao-nselect" name="menu-pedidos" value="processo">Em Andamento</button>
+            <button type="submit" class="botoes-select" name="menu-pedidos" value="finalizado">Finalizados</button>
+            {%endif%}
+        
+        </form>
+    </div>
+
+    <div class="quantidade-pedidos">
+    <p>Quantidade: {{ total_pedidos if total_pedidos is defined else 0 }}</p>
+    {% if valor_pedidos is defined and valor_pedidos is not none %}
+        <p>Valor total: R$ {{ "{:,.2f}".format(valor_pedidos).replace(",", "v").replace(".", ",").replace("v", ".") }}</p>
+    {% else %}
+        <p>Valor total: R$ 0,00</p>
+    {% endif %}
+    </div>
+    <div class="pedidos-mural">
+        <div class="todos-pedidos">
+            {% for codigo, pedidos in pedidos_agrupados %}
+                <div class="codigo-pedidos">
+                    <p><strong>Data do Pedido:</strong> {{ pedidos[0].data_pedido.strftime('%d/%m/%Y') }}</p>
+                    <p><strong>Código:</strong> {{ codigo }}</p>
+                    <div class="pedidos-container">
+                        {% for pedido in pedidos %}
+                            <div class="pedido-container">
+                                <a href="{{ url_for('detalhe_pedido', codigo_pedido=pedido.codigo_pedido) }}">
+                                    <img src="{{ url_for('static', filename='imagens/' ~ pedido.imagem) }}" alt="Imagem do bordado">
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+        </div>
+    </div>
+    <form id="form-menu-pedidos" action="{{ url_for('pedidosadm') }}" method="POST" style="display: none;">
+        <input type="hidden" name="menu-pedidos" id="campo-menu-pedidos">
+    </form>
+
+    <script>
+        function enviarMenu(valor) {
+            document.getElementById("campo-menu-pedidos").value = valor;
+            document.getElementById("form-menu-pedidos").submit();
+        }
+    </script>
+
+
+
+{%elif tipo == 'cliente'%}
+    {%if pedidos %}
+    <div class="pedidos-mural">
+        <div class="todos-pedidos">
+            {% for item in pedidos %}  
+                <div class="pedido-container1">
+        
+                    <input type="hidden" name="codigo_pedidos" value="{{ item.codigo_pedido }}">
+                    <div class="pedido-container2">
+                        <p>Referência:</p>
+                        <img src="{{ url_for('static', filename='imagens/' + item.imagem) }}" width="150">
+                        <p>Preço: R$ {{ item.preco }}</p>
+                        <p>Detalhes do bordado:</p>
+                        <ul>
+                            {% for desc in item.bordado_tamanho %}
+                                <li>{{ desc.strip() }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="pedido-container3">
+                        <p>Pedido:</p>
+                        <div class="imagem-container3">
+                            {% if item.fotos %}
+                                {% for foto in item.fotos.split(',') %}
+                                <img src="{{ url_for('static', filename='imagens/' ~foto.strip()) }}" width="150">
+                                {% endfor %}
+                            {% else %}
+                                <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" width="100" alt="Sem imagem enviada">
+                            {% endif %}
+                        </div>
+                        <p>Detalhes do pedido:</p>
+                        <p> {{item.descricao}}</p>
+                        </p>
+                        <p>Quantidade: {{ item.quantidade }}</p>
+                    </div>
+                <form action="{{ url_for('excluir_pedido_cliente', codigo_pedido=item.codigo_pedido) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este pedido?')">
+                    <input type="hidden" name="id_bordado" value="{{ item.id_bordado }}"> 
+                    <button type="submit" class="btn btn-danger">Excluir Pedido</button>
+                    <a href="{{ url_for('editar_pedido_cliente', codigo_pedido=item.codigo_pedido) }}" class="botao">Editar Pedido</a>
+                    
+                </form>    
+                </div>
+                
+            {% endfor %}
+            
+        </div>    
+    </div>
+        
+    {% else %}
+        <p>Nenhum pedido encontrado.</p>
+
+         <div class="botao-centro">
+            <a href="{{ url_for('catalogo', tema=tema if tema and tema|lower != 'todos' else None) }}" class="botao" onclick="voltarAoCatalogo()">Voltar ao Catálogo</a>
+        </div>
+    {% endif %}
+{% else %}
+
+
+    {%if pedidos%}  
+    <div class="pedidos-mural">
+
+        <div class="todos-pedidos">
+            {% for item in pedidos %}  
+                <div class="pedido-container1">
+        
+                    <input type="hidden" name="codigo_pedido" value="{{ item.codigo_pedido }}">
+                    <div class="pedido-container2">
+                        <p>Referência:</p>
+                        <img src="{{ url_for('static', filename='imagens/' + item.imagem) }}" width="150">
+                        <p>Preço: R$ {{ item.preco }}</p>
+                        <p>Detalhes do bordado:</p>
+                        <ul>
+                            {% for desc in item.bordado.tamanho %}
+                                <li>{{ desc.strip() }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="pedido-container3">
+                        <p>Pedido:</p>
+                        <div class="imagem-container3">
+                            {% if item.fotos %}
+                                {% for foto in item.fotos.split(',') %}
+                                <img src="{{ url_for('static', filename='imagens/' ~foto.strip()) }}" width="150">
+                                {% endfor %}
+                            {% else %}
+                                <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" width="100" alt="Sem imagem enviada">
+                            {% endif %}
+                        </div>
+                        <p>Detalhes do pedido:</p>
+                        <p> {{item.descricao}}</p>
+                        <p>Quantidade: {{ item.quantidade }}</p>
+                    </div>
+                    
+                </div>
+                
+            {% endfor %}
+            
+        </div>    
+    </div>
+        <!-- Usa o primeiro item da lista como referência para dados do cliente -->
+        <div class="info-cliente">
+            <p>Nome: {{ pedidos[0].nome_cliente }}</p>
+            <p>Email: {{ pedidos[0].email_cliente }}</p>
+            <p>Telefone: {{ pedidos[0].tel_cliente }}</p>
+            <p>Status: {{ pedidos[0].status_pedido }}</p>
+            <p>Data: {{ pedidos[0].data_pedido.strftime('%d/%m/%Y') }}</p>
+        </div>
+        <form action="{{url_for('excluir_pedido', codigo_pedido=pedidos[0].codigo_pedido) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este pedido?')">
+            <button type="submit" class="btn btn-danger"onclick="return confirm('Tem certeza que deseja excluir este pedido?')">Excluir Pedido</button>
+            <a href="{{ url_for('editar_pedido', codigo_pedido=pedidos[0].codigo_pedido) }}" class="botao">Editar Pedido</a>
+    {% else %}
+        <form class= "pedido-busca" method="post">
+            <label>Informe o código do pedido:</label><br>
+            <input type="text" name="termo_busca" value="{{ termo }}">
+            <button type="submit">Buscar</button>
+        </form>
+    {% endif %}
+{% endif %}
+
+
+     <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+    <div class="carrinho-fixo">
+        <a href="/carrinho">
+            <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+        </a>
+    </div>
+
+    <div class="carrinho-container">
+        {% if item_carrinho %}
+        <span class="bolinha-notificacao"></span>
+        {% endif %}
+    </div>
+
+    <footer class ="rodape">
+        <p>&copy; 2025 O Astronauta Bordados.</p>
+        {%for contato in contatos %}
+        <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+        {% endfor %}
+    </footer>
+</div>    
+</body>
+</html>

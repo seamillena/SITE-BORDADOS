@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Bordado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+    <title>Início - O Astronauta Bordados</title>
+</head>
+<nav>
+    {%if tipo == 'cliente' or tipo == 'administrador'%}
+    <div class="botao-perfil">
+        <div class="foto-perfil">
+            {% if usuario %}
+                <a href="{{ url_for('perfil') }}">
+                    <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                </a>
+            {% else %}
+                <img src="{{ url_for('static', filename='imagens/user.png') }}">
+            {% endif %}
+        </div>
+    
+        {%if nome and sobrenome %}
+            <a href="{{url_for('perfil')}}"> {{nome}} {{sobrenome}}</a>
+        {% else %}
+            <a href="{{url_for('perfil')}}">Usuário</a>
+        {% endif %}
+    </div>
+    {%endif%}
+    <div class="menu">
+        <a href="/">Início</a>
+        <a class="menu-select" href="/catalogo">Catálogo</a>
+        <a href="/mural">Mural</a>
+        {%if tipo =='administrador'%}
+            <a href="/configuracoes">Configurações</a>
+        {%else%}
+            <a href="/carrinho">Carrinho</a>
+        {%endif%}
+        <a href="/pedidos"> Pedidos </a>
+        {%if tipo =='usuario'%}
+            <a href="/login">Login</a>
+        {%else%}
+            <a href="/logout">Logout</a>
+        {%endif%}
+    </div>
+
+</nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                {%if tipo =='usuario'%}
+                    <h2>BORDADOS</h2>
+                {%elif tipo =='administrador'%}
+                    <h2>BORDADOS | ADMINISTRADOR</h2>
+                {%else%}
+                    <h2>BORDADOS | CLIENTE</h2>
+                {%endif%}
+            </div>
+        </a>
+    </header>
+
+    <!-- Conteúdo da página -->
+<body>
+    <div class="botao-centro">
+        <a href="{{ url_for('catalogo', tema=tema if tema and tema|lower != 'todos' else None) }}" class="botao" onclick="voltarAoCatalogo()">Voltar ao Catálogo</a>
+    </div>
+    <!-- Filtro Aplicado -->
+{% if tema!= 'todos' %}
+    <p><strong>Filtro aplicado:</strong> {{ tema.capitalize() }}</p>
+{% else %}
+    <p>Nenhum filtro aplicado</p>
+{%endif%}
+
+<!-- Detalhes do Bordado -->
+    <div class="conteudo-bordado">
+        <div class="navegacao">
+            <!-- Botão Anterior -->
+            <a href="{{ url_for('detalhes', id=prev_id, tema=tema) }}" class="botao">Anterior</a>
+    
+            <!-- Botão Próximo -->
+            <a href="{{ url_for('detalhes', id=next_id, tema=tema) }}" class="botao">Próximo</a>
+        </div>
+        <div class="carrossel-e-detalhes">
+            <div class="carrossel">
+                <div class="carrossel-imagens" id="carrossel-imagens">
+                    {% if bordado.imagens%}
+                        {% for imagem in bordado.imagens %}
+                            <img src="{{ url_for('static', filename='imagens/' + imagem) }}" alt="Imagem do bordado" class="zoom">
+                        {% endfor %}
+                    {% else %}
+                        <img src="{{ url_for('static', filename='imagens/none_foto.jpg') }}" alt="Sem imagem enviada" class="zoom">
+                    {% endif %}
+                </div>
+                <div class="botoes-carrossel">
+                    <button onclick="mudarImagem(-1)">&#8249;</button>
+                    <button onclick="mudarImagem(1)">&#8250;</button>
+                </div>
+            </div>
+            
+            <div class="detalhes-bordado">
+                <p><strong>Detalhes: </strong></p>
+                {%for descricao in detalhes_bordados %}
+                    <li>{{ descricao }}</li>
+                {% endfor %}
+            <p><strong>Tamanho:</strong> {{ bordado.tamanho }} cm</p>
+            <p><strong>Preço:</strong> R$ {{ bordado.preco }}</p>
+                
+
+            
+             
+                
+
+            {%if tipo =='administrador'%}
+                <form action="{{ url_for('confirmar_exclusao', bordado_id=bordado.id) }}" method="POST">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja excluir este bordado?')">Excluir Bordado</button>
+                </form>
+                <div class="botao-editar">
+                    <a href="{{ url_for('editar_bordado',id=bordado.id)}}" class="botao">Editar Bordado</a>
+                </div>   
+            
+            </div>
+            {%else%}
+           
+            <form action="/atualizar_carrinho" method="post">
+                <input type="hidden" name="id" value="{{ bordado.id }}">
+                <button class="botao"type="submit" onclick="alert('Adicionado ao carrinho!')">Adicionar ao Carrinho </button>
+                    
+            </form>
+                        
+            </div>
+            {%endif%}
+
+            
+        </div>    
+        
+    </div>
+    </div>
+     {%if tipo != 'administrador'%}
+    <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+    <div class="carrinho-fixo">
+        <a href="/carrinho">
+            <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+        </a>
+    </div>
+
+    <div class="carrinho-container">
+        {% if item_carrinho %}
+        <span class="bolinha-notificacao"></span>
+        {% endif %}
+    </div>
+    {%endif%}
+    <script>
+
+
+    let imagemIndex = 0; // Inicializa a variável para o índice da imagem.
+
+    // Função para mudar as imagens
+    function mudarImagem(direcao) {
+        const imagens = document.querySelectorAll('.carrossel-imagens img');
+        imagemIndex += direcao;
+
+        if (imagemIndex < 0) {
+            imagemIndex = imagens.length - 1; // Vai para a última imagem
+        } else if (imagemIndex >= imagens.length) {
+            imagemIndex = 0; // Volta para a primeira imagem
+        }
+
+        // Oculta todas as imagens e mostra a atual
+        imagens.forEach((img, index) => {
+            img.style.display = (index === imagemIndex) ? 'block' : 'none';
+        });
+    }
+
+    // Inicializar a exibição da primeira imagem
+    document.addEventListener('DOMContentLoaded', () => {
+        const imagens = document.querySelectorAll('.carrossel-imagens img');
+        if (imagens.length > 0) {
+            imagens.forEach((img, index) => {
+                img.style.display = (index === imagemIndex) ? 'block' : 'none';
+            });
+        }
+    });
+
+        // Salva a posição do scroll antes de sair da página
+        window.onbeforeunload = function() {
+            sessionStorage.setItem('scrollPosition', window.scrollY);
+        };
+
+        // Restaura a posição do scroll quando a página é recarregada
+        window.onload = function() {
+            var scrollPosition = sessionStorage.getItem('scrollPosition');
+            if (scrollPosition) {
+                window.scrollTo(0, scrollPosition);
+            }
+        };
+    </script>
+
+       
+<div class="carrinho-container">
+    {% if item_carrinho %}
+    <span class="bolinha-notificacao"></span>
+    {% endif %}
+</div>
+
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>
+</body>
+</html>

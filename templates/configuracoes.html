@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/astronauta.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+    <title>Configurações - O Astronauta Bordados</title>
+</head>
+<body>
+    <nav>
+        <div class="botao-perfil">
+            <div class="foto-perfil">
+                {% if usuario %}
+                    <a href="{{ url_for('perfil') }}">
+                        <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                    </a>
+                {% else %}
+                    <img src="{{ url_for('static', filename='imagens/user.png') }}">
+                {% endif %}
+            </div>
+        
+            {%if nome and sobrenome %}
+                <a href="{{url_for('perfil')}}">{{nome}} {{sobrenome}}</a>
+            {% else %}
+                <a href="{{url_for('perfil')}}">Usuário</a>
+            {% endif %}
+          </div>
+    
+        <div class="menu">
+
+            <a href="/">Início</a>
+            <a href="/catalogo">Catálogo</a>
+            <a href="/mural">Mural</a>
+            <a class="menu-select" href="/configuracoes">Configurações</a>
+                    <a href="/pedidos">Pedidos</a>
+            <a href="/logout" onclick="return confirm('Tem certeza que deseja sair?')">Logout</a>
+        </div>
+    </nav>
+    
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS | ADMINISTRADOR</h2>
+            </div>
+        </a>
+    </header>
+    <div class="botoes-align">
+        <form method="POST" class="botoes-conf">
+            {%if menu =='menu-administradores'%}
+            <button type="submit" class="botao-nselect" name="menu-conf" value="contatos">Contatos</button>
+            <button type="submit" class="botoes-select" name="menu-conf" value="menu-administradores">Administradores</button>
+            <button type="submit" class="botao-nselect" name="menu-conf" value="clientes">Clientes</button>
+            {%elif menu=='clientes'%}
+            <button type="submit" class="botao-nselect" name="menu-conf" value="contatos">Contatos</button>
+            <button type="submit" class="botao-nselect" name="menu-conf" value="menu-administradores">Administradores</button>
+            <button type="submit" class="botoes-select" name="menu-conf" value="clientes">Clientes</button>
+            {%else%}
+            <button type="submit" class="botoes-select" name="menu-conf" value="contatos">Contatos</button>
+            <button type="submit" class="botao-nselect" name="menu-conf" value="menu-administradores">Administradores</button>
+            <button type="submit" class="botao-nselect" name="menu-conf" value="clientes">Clientes</button>
+
+            {%endif%}
+        
+        </form>
+    </div>
+     <script>
+        function enviarMenu(valor) {
+            document.getElementById("campo-menu-conf").value = valor;
+            document.getElementById("form-menu-conf").submit();
+        }
+    </script>
+
+    {% with mensagens = get_flashed_messages(with_categories=true) %}
+        {% for categoria, msg in mensagens %}
+            <div class="mensagem-erro">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+
+    {%if menu =='contatos'%}
+        <table class="tabela-configuracoes">
+            <thead class="cabecalho-tabela">
+                <tr>
+                    <th>TELEFONE</th>
+                    <th>EMAIL</th>
+                    <th>INSTAGRAM</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            
+            {% for contato in contatos %}
+                <form action="/editar_contatos/{{ contato['id'] }}" method="POST" enctype="multipart/form-data">
+
+                    <td>
+                        <input type="text" name="numero" value="{{ contato['numero'] }}">
+                    </td>
+            
+                    <td>
+                        <input type="text" name="email" value="{{ contato['email'] }}">
+                    </td>
+                    
+                    <td>
+                        <input type="text" name="insta" value="{{ contato['insta'] }}">
+                    </td>
+                    
+                    <td>
+                        <button type="submit">Salvar</button>
+                    </td>             
+                    
+                </form>
+            {% endfor %}
+            </tbody>
+        </table>
+    
+    {%elif menu =='menu-administradores'%}
+        <table class="tabela-configuracoes">
+            <thead class="cabecalho-tabela">
+                <tr>
+                    <th>NOME</th>
+                    <th>USUÁRIO</th>
+                    <th>TIPO</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+  
+            <tbody>
+            {% for administrador in usuarios %}
+                <tr>
+                    <td>{{administrador.nome}} {{administrador.sobrenome}}</td>
+
+                    <td>{{administrador.usuario}}</td>
+
+                    <td>             
+                        <form action="/editar_administradores" method="POST">
+                            <input type="hidden" name="usuario" value="{{ administrador.usuario }}">
+                            <input type="hidden" name="id" value="{{ administrador.id }}">
+                            <select name="tipo" id="status{{ administrador.id }}">
+                                <option value="administrador" {% if administrador.tipo == 'administrador' %}selected{% endif %}>Administrador</option>
+                                <option value="cliente" {% if administrador.tipo == 'cliente' %}selected{% endif %}>Cliente</option>
+                            </select>
+                            <button type="submit">&#10003;</button>
+                        </form>
+                    
+                    </td>
+
+                    <td>                    
+                        <form action="/excluir_usuario" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                            <input type="hidden" name="id" value="{{ administrador.id }}">
+                            <button type="submit">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    
+        </table>
+                        
+
+        
+    {%elif menu =='clientes'%} 
+        <table class="tabela-configuracoes">
+
+            <thead class="cabecalho-tabela">
+                <tr>
+                    <th>NOME</th>
+                    <th>USUÁRIO</th>
+                    <th>TIPO</th>
+                    <th>AÇÕES</th>
+                </tr>
+            </thead>
+  
+            <tbody>
+            {% for cliente in usuarios %}
+                <tr>
+                    <td>{{cliente.nome}} {{cliente.sobrenome}}</td>
+
+                    <td>{{cliente.usuario}}</td>
+
+                    <td>             
+                        <form action="/editar_clientes" method="POST">
+
+                            <input type="hidden" name="usuario" value="{{ cliente['usuario'] }}">
+                            <input type="hidden" name="id" value="{{ cliente['id'] }}">
+                            <select name="tipo" id="tipo{{ cliente['usuario'] }}">
+                                <option value="administrador" {% if cliente.tipo == 'administrador' %}selected{% endif %}>Administrador</option>
+                                <option value="cliente" {% if cliente.tipo == 'cliente' %}selected{% endif %}>Cliente</option>
+                            </select>
+                            <button type="submit">&#10003;</button>
+                        </form>
+                    
+                    </td>
+
+                    <td>                    
+                        <form action="/excluir_usuario/{{ cliente.id }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?');">
+                            <button type="submit">Excluir</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    
+    </table>
+    {%endif%}
+   
+
+    <footer class ="rodape">
+        <p>&copy; 2025 O Astronauta Bordados.</p>
+        {%for contato in contatos %}
+        <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+        {% endfor %}
+    </footer>      
+</body> 
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/astronauta.png') }}">
+    <title>Cadastro - O Astronauta Bordados</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+<body>
+    <nav> 
+    <div class="menu" >
+        <a href="/">Início</a>
+        <a href="/catalogo">Catálogo</a>
+        <a href="/mural">Mural</a>
+        <a href="/carrinho">Carrinho</a>
+        <a href="/pedidos"> Pedidos </a>
+        <a class="menu-select" href="/login">Login</a>
+
+    </nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS</h2>
+            </div>
+        </a>
+    </header>
+
+    <input type="hidden" name="menu" id="menu" value="menu">
+   
+   
+    <div class="edicao-cadastro">
+    {%if menu=='confirmar_email'%}
+
+        {%if mensagem%}
+            <p>{{mensagem}}</p>
+            <form action="/verificar_email" method="post">
+                <input type="hidden" name="email" id="email" value = "{{ email }}">
+                <button type="submit">Novo Código</button>
+            </form>
+
+        {%elif mensagem_verificado%}
+            <p>{{mensagem_verificado}}</p>
+            <a href="/login" class="botao-centro">login</a>
+
+        {%else%}
+    
+
+        <form action="/confirmar_email" id="form-confirmar" method="post">
+
+                <input type="hidden" name="email" id="email" value = "{{ email }}"><br><br>
+
+                <label for="confirmar_senha">Código de Verificação:</label><br>
+                <input type="text" name="codigo_email" id="codigo_email" value="{{ codigo_email }}"><br><br>
+
+                <button type="submit" value="Confirmar"> Confirmar</button>
+
+                
+            </form>
+        {%endif%}
+        
+        <script>
+
+            window.onload = function () {
+                setTimeout(function () {
+                    document.getElementById('form-confirmar').submit();
+                }, 2000);
+            }
+
+            window.onload = function () {
+                // Verifica se já enviou o formulário nesta sessão
+                if (!sessionStorage.getItem('formEnviado')) {
+                    setTimeout(function () {
+                        document.getElementById('form-confirmar').submit();
+                        sessionStorage.setItem('formEnviado', 'true');
+                    }, 2000);
+                }
+            };
+
+
+            
+        </script>
+    
+    {%elif menu=='cadastrado'%}
+
+    {%else%}
+
+        <form method="post" action="/cadastro">
+
+            <label for="nova_senha">Nome:</label><br>
+            <input type="text" name="novo_nome" id="novo_nome" required><br><br>
+
+            <label for="confirmar_senha">Sobrenome:</label><br>
+            <input type="text" name="novo_sobrenome" id="novo_sobrenome" required><br><br>
+
+            <label for="codigo">Email:</label><br>
+            <input type="text" name="novo_email" id="novo_email" required><br><br>
+
+            <label for="confirmar_email">Confirmar Email:</label><br>
+            <input type="texto" name="confirmar_email" id="confirmar_email" required><br><br>
+
+            
+            <label for="novo_usuario">Telefone:</label><br>
+            <input type="text" name="novo_telefone" id="novo_telefone" required><br><br>
+
+
+            <label for="novo_usuario">Nome de Usuário:</label><br>
+            <input type="text" name="novo_usuario" id="novo_usuario" required><br><br>
+
+            <label for="nova_senha">Senha:</label><br>
+            <input type="password" name="nova_senha" id="nova_senha" required><br><br>
+
+            <label for="confirmar_senha">Confirmar Senha:</label><br>
+            <input type="password" name="confirmar_senha" id="confirmar_senha" required><br><br>
+
+            <div class="botao-centro">
+                <a href="{{ url_for('login') }}" class="botao-cadastro" >Voltar ao Login</a>
+                <button type="submit" class="botao" value="Cadastrar"> Cadastrar</button>
+            </div>
+            
+        </form>
+    </div>
+
+{%endif%}
+</div>
+
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>
+</body>
+</html>

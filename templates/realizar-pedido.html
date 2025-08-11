@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Bordado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+
+</head>
+
+<body>
+    <nav>
+        <a href="/">Início</a> |
+        <a href="/catalogo">Catálogo</a> |
+        <a href="/mural">Mural</a> |
+        <a href="/carrinho">Carrinho</a> |
+        <a href="/pedidos"> Pedidos </a> |
+        <a href="/login">Login</a>
+    </nav>
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                <h2>BORDADOS</h2>
+            </div>
+        </a>
+    </header>
+
+    <div class="botao-centro">
+        <a href="{{ url_for('carrinho') }}" class="botao">Voltar para Carrinho</a>
+    </div>
+<form action="/finalizar_pedido" method="post" enctype="multipart/form-data">
+    <div class="todos-pedidos">
+        {% for item in bordados %}
+        <div class="pedido-container1">
+            <div class="pedido-container2">
+                <img src="{{ url_for('static', filename='imagens/'~ item.imagem) }}" alt="imagem do bordado">
+                <p>Preço: R$ {{ item.preco }}</p>  
+                {% for desc in item.descricao.split(',') %}
+                    <li>{{ desc.strip() }}</li>
+                {% endfor %}
+
+            </div>  
+            <div class="pedido-container4">
+                <p><strong>Detalhes do Pedido:</strong></p>
+                <p>Adicionar imagens de referência:</p>
+                <input type="file" name="fotos_{{ item.id }}" multiple accept="image/*">
+                
+                <p>Quantidade: {{ item.quantidade }}</p>
+
+                <label for="descricao_{{ item.id }}">Descreva seu pedido:</label>    
+                <textarea name="descricao_{{ item.id }}" id="descricao_{{ item.id }}" required></textarea> 
+            </div> 
+        </div>    
+        {% endfor %}
+    </div>
+    
+
+    <div class="formulario-pedido">
+        <label for="nome_cliente">Nome:</label>
+        <input type="text" name="nome_cliente" id="nome_cliente" required>
+
+        <label for="tel_cliente">Telefone:</label>
+        <input type="text" name="tel_cliente" id="tel_cliente" required>
+
+        <label for="email_cliente">Email:</label>
+        <input type="email" name="email_cliente" id="email_cliente" required>
+    </div>
+        
+    <div class="botoes-carrinho">
+        <button class="botao" type="submit">Finalizar pedido</button>
+    </div>    
+</form>
+   
+
+<p class="mensagem-pedido">Cadastre-se para acessar seus pedidos com mais facilidade.
+        <div class="botao-centro">
+        <a href="{{ url_for('cadastro') }}" class="botao-mensagem">Cadastro</a>
+        </div>
+    </p>
+ 
+<div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+    <div class="carrinho-fixo">
+        <a href="/carrinho">
+            <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+        </a>
+    </div>
+
+    <div class="carrinho-container">
+        {% if item_carrinho %}
+        <span class="bolinha-notificacao"></span>
+        {% endif %}
+    </div>
+
+    <footer class ="rodape">
+        <p>&copy; 2025 O Astronauta Bordados.</p>
+        {%for contato in contatos %}
+        <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+        {% endfor %}
+    </footer>
+</body>
+</html>

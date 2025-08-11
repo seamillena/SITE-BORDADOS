@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <title>Perfil - O Astronauta Bordados</title>
+    </head>
+<nav>
+    {%if tipo == 'cliente' or tipo == 'administrador'%}
+    <div class="botao-perfil">
+        <div class="foto-perfil">
+            {% if usuario %}
+                <a href="{{ url_for('perfil') }}">
+                    <img src="{{ url_for('static', filename='imagens/' ~ (foto or 'user.png')) }}">
+                </a>
+            {% else %}
+                <img src="{{ url_for('static', filename='imagens/user.png') }}">
+            {% endif %}
+        </div>
+    
+        {%if nome and sobrenome %}
+            <a href="{{url_for('perfil')}}"> {{nome}} {{sobrenome}}</a>
+        {% else %}
+            <a href="{{url_for('perfil')}}">Usuário</a>
+        {% endif %}
+    </div>
+    {%endif%}
+
+    <div class="menu">
+      
+        <a href="/">Início</a>
+        <a href="/catalogo">Catálogo</a>
+        <a href="/mural">Mural</a>
+        {%if tipo =='administrador'%}
+            <a href="/configuracoes">Configurações</a>
+        {%else%}
+            <a href="/carrinho">Carrinho</a>
+        {%endif%}
+        <a href="/pedidos"> Pedidos </a>
+        {%if tipo =='usuario'%}
+            <a href="/login">Login</a>
+        {%else%}
+            <a href="/logout">Logout</a>
+        {%endif%}
+
+
+    </nav>
+
+    <header class="logo-header">
+        <a href="/">
+            <img src="{{ url_for('static', filename='imagens/astronauta.png') }}" alt="Astronauta bordando">   
+            <div class="texto-logo">
+                <h1>O Astronauta</h1>
+                {%if tipo =='administrador'%}
+                    <h2>BORDADOS | ADMINISTRADOR</h2>
+                {%else%}
+                    <h2>BORDADOS | CLIENTE</h2>
+                {%endif%}
+            </div>
+        </a>
+    </header>
+
+    <!-- Conteúdo da página -->
+<body>
+   <div class="foto-perfil-grande">
+            <img src="{{ url_for('static', filename='imagens/' + (foto or 'user.png')) }}" alt="Foto de perfil" />
+        </div>
+
+     {% if mensagem %}
+        <p style="color: red;">{{ mensagem }}</p>
+    {% endif %}
+
+<form action="{{ url_for('editar_perfil') }}" method="POST" enctype="multipart/form-data" class="form-perfil">
+    
+    <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" value="{{ nome }}" required />
+    </div>
+
+    <div class="form-group">
+        <label for="sobrenome">Sobrenome:</label>
+        <input type="text" id="sobrenome" name="sobrenome" value="{{ sobrenome }}" required />
+    </div>
+
+    <div class="form-group">
+        <label for="usuario">Nome de usuário:</label>
+        <input type="text" id="usuario" name="usuario" value="{{ usuario }}" required />
+    </div>
+
+    <div class="form-group">
+        <button type="button" id="btn-alterar-senha" class="btn-alterar-senha">Alterar senha</button>
+    </div>
+
+    <div id="form-senha" class="form-senha" style="display:none;">
+        <div class="form-group">
+            <label for="senha_atual">Senha Atual:</label>
+            <input type="password" id="senha_atual" name="senha_atual" />
+        </div>
+
+        <div class="form-group">
+            <label for="nova_senha">Nova Senha:</label>
+            <input type="password" id="nova_senha" name="nova_senha" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="imagem">Alterar foto de perfil:</label>
+        <input type="file" id="imagem" name="imagem" accept="image/*" />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn-salvar">Salvar alterações</button>
+    </div>
+</form>
+
+<script>
+    document.getElementById('btn-alterar-senha').addEventListener('click', function() {
+        const formSenha = document.getElementById('form-senha');
+        if (formSenha.style.display === 'none') {
+            formSenha.style.display = 'block';
+            this.textContent = 'Cancelar alteração de senha';
+            document.getElementById('senha_atual').required = true;
+            document.getElementById('nova_senha').required = true;
+        } else {
+            formSenha.style.display = 'none';
+            this.textContent = 'Alterar senha';
+            document.getElementById('senha_atual').required = false;
+            document.getElementById('nova_senha').required = false;
+            document.getElementById('senha_atual').value = '';
+            document.getElementById('nova_senha').value = '';
+        }
+    });
+</script>
+     <div class="instagram-fixo">
+        <a href="https://www.instagram.com/oastronauta.bordados/">
+            <img src="{{ url_for('static', filename='imagens/instagram.png') }}" alt="Instagram">
+        </a>
+    </div>
+    
+    <div class="whatsapp-fixo">
+        <a href="https://wa.me/5527997402134" target="_blank">
+            <img src="{{ url_for('static', filename='imagens/whatsapp.png') }}" alt="Whatsapp">
+        </a>
+    </div>
+
+        <div class="carrinho-fixo">
+            <a href="/carrinho-cliente">
+                <img src="{{ url_for('static', filename='imagens/carrinho.png') }}" alt="Carrinho">
+            </a>
+        </div>
+        <div class="carrinho-container">
+            {% if item_carrinho %}
+            <span class="bolinha-notificacao"></span>
+            {% endif %}
+        </div>
+
+<footer class ="rodape">
+    <p>&copy; 2025 O Astronauta Bordados.</p>
+    {%for contato in contatos %}
+    <p>{{ contato['numero'] }} | {{ contato['email'] }} | {{ contato['insta'] }}</p>
+    {% endfor %}
+</footer>      
+</body>    
+</html>
